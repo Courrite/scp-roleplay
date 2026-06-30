@@ -7,3 +7,4 @@ An expanding collection of addon sources that can be utilized to improve quality
 - Flamethrower
 - Grenades
 - Landmines
+- Site Remote Control
