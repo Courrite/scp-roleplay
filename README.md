@@ -5,3 +5,5 @@ An expanding collection of addon sources that can be utilized to improve quality
 
 ## Planned:
 - Flamethrower
+- Grenades
+- Landmines
