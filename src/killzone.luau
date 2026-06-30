@@ -1,3 +1,4 @@
+-- idk how to make it morph with your actual avatar and not the rig
 local function morph(plr, kzSize)
 	if kzSize < 5  or kzSize > 25 then
 		runCommand(":alert " .. plr .. " Invalid size.")
@@ -36,7 +37,7 @@ local function morph(plr, kzSize)
 	part.Parent = rig
 	weld.Parent = rig.HumanoidRootPart
 
-  -- did this because loops in scprp suck ass, that shit would drop after just one cycle
+  	-- did this because loops in scprp suck ass, that shit would drop after just one cycle
 	rig.LeftFoot:Destroy()
 	rig.LeftUpperLeg:Destroy()
 	rig.LeftLowerLeg:Destroy()
@@ -53,7 +54,7 @@ local function morph(plr, kzSize)
 	rig.UpperTorso:Destroy()
 	rig.Head:Destroy()
 
-	task.wait(0.1) -- give scppr time to register the rig
+	task.wait(0.1) -- give scprp time to register the rig
 	
 	runCommand("morph " .. plr .. " " .. rig.Name)
 
