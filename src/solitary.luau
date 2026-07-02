@@ -1,4 +1,8 @@
---using recursion because the scheduler lags on loops
+-- using recursion because the scheduler lags on loops
+--[[
+	this thing works on rejoin, team switch (if the team is inside canJail)
+	restarting breaks the wait so keep this in mind
+]]
 
 local solitaryParts = "SolitaryParts"
 local tagged = f(solitaryParts):GetChildren()
