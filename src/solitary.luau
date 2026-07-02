@@ -1,22 +1,31 @@
--- using recursion because the scheduler lags on loops
 --[[
-	this thing works on rejoin, team switch (if the team is inside canJail)
-	restarting breaks the wait so keep this in mind
+	Author: @AsterVreburn
+
+	Description:
+		A script that turns all the parts inside a group with a specific name
+		into parts that confine certain teams upon being touched, this works
+		both on rejoin, team switch and, if you set a spawnpoint, resetting too.
+		
+	Notes:
+		- using recursion because the scheduler lags on loops
+		- to make a team jailable put its name inside the CONFINEABLE table
+		- restarting breaks the wait so keep this in mind
 ]]
 
-local solitaryParts = "SolitaryParts"
-local tagged = f(solitaryParts):GetChildren()
+local SOLITARY_PARTS_GROUP_NAME = "SolitaryParts" -- should be a model (group)
+local CONFINEMENT_TIME = 10
+local CONFINEMENT_TEAM = "Solitary Confinement"
+local CONFINEABLE = {
+	["Class - Disposable"] = true
+}
 
 local confinedPlayers = {}
 local confinementTimes = {}
 local lastTeams = {}
+local resetScorePlrs = {}
+local tagged = f(SOLITARY_PARTS_GROUP_NAME):GetChildren()
 
-local canJail = {
-	["Class - Disposable"] = true
-}
-local confinementTimeCd = 60
-local confinementTeam = "Solitary Confinement"
-
+-- forward declare functions (otherwise they wont be able to call eachother)
 local waitAndRepeat;
 local checkAndRelease;
 
@@ -39,27 +48,28 @@ function checkAndRelease(index)
 	local confinementTime = confinementTimes[plrName] or 0
 	local increment = 1
 
-	if getTeam(plrName) == confinementTeam then
-		runCommand("score " .. plrName .. " " .. math.floor(confinementTimeCd - (os.clock() - confinementTime)))
+	-- i could make this look better but i am the laziest creature on earth so
+	if getTeam(plrName) == CONFINEMENT_TEAM then
+		runCommand("score " .. plrName .. " " .. math.floor(CONFINEMENT_TIME - (os.clock() - confinementTime)))
+		resetScorePlrs[plrName] = nil
+	elseif not resetScorePlrs[plrName] and getTeam(plrName) ~= CONFINEMENT_TEAM then
+		resetScorePlrs[plrName] = true
+		runCommand("score " .. plrName .. " 0")
 	end
 
-	if getTeam(plrName) == confinementTeam then
-		runCommand("rtag " .. plrName .. " Solitary Confinement")
-	end
-
-	if canJail[getTeam(plrName)] then
-		setTeam(plrName, confinementTeam)
+	if CONFINEABLE[getTeam(plrName)] then
+		setTeam(plrName, CONFINEMENT_TEAM)
 		runCommand("respawn " .. plrName)
 	end
 
-	if os.clock() - confinementTime >= confinementTimeCd then
-		if getTeam(plrName) and lastTeams[plrName] and getTeam(plrName) == confinementTeam then
+	if os.clock() - confinementTime >= CONFINEMENT_TIME then
+		if getTeam(plrName) and lastTeams[plrName] and getTeam(plrName) == CONFINEMENT_TEAM then
 			setTeam(plrName, lastTeams[plrName])
 		end
 
 		lastTeams[plrName] = nil
 		confinementTimes[plrName] = nil
-	
+		resetScorePlrs[plrName] = nil
 		table.remove(confinedPlayers, index)
 		increment = 0 -- dont increment so we can check the next element
 		
@@ -81,13 +91,13 @@ local function connectParts()
 	
 	part.CanQuery = false
 	part.Touched:Connect(function(plr)
-		if not canJail[getTeam(plr)] then return end
+		if not CONFINEABLE[getTeam(plr)] then return end
 	
 		table.insert(confinedPlayers, plr)
 		confinementTimes[plr] = os.clock()
 		lastTeams[plr] = getTeam(plr)
 	
-		setTeam(plr, confinementTeam)
+		setTeam(plr, CONFINEMENT_TEAM)
 		runCommand("respawn " .. plr)
 	end)
 
